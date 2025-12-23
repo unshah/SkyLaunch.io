@@ -61,6 +61,10 @@ export default function CFILayout() {
                 name="profile"
                 options={{ href: null }}
             />
+            <Tabs.Screen
+                name="availability"
+                options={{ href: null }}
+            />
         </Tabs>
     );
 }

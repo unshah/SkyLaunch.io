@@ -105,7 +105,19 @@ export const useCFIStore = create<CFIStore>((set, get) => ({
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return null;
 
-            // Generate a random 6-character code
+            // First check if CFI already has an invite code
+            const { data: existingProfile } = await supabase
+                .from('cfi_profiles')
+                .select('invite_code')
+                .eq('user_id', session.user.id)
+                .single();
+
+            // If code already exists, return it (don't regenerate)
+            if (existingProfile?.invite_code) {
+                return existingProfile.invite_code;
+            }
+
+            // Generate a random 6-character code (only if none exists)
             const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
             // Update CFI profile with new code

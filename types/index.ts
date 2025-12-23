@@ -15,6 +15,8 @@ export interface UserProfile {
     current_flight_hours: number;
     target_completion_date: string | null;
     home_airport: string | null; // ICAO code
+    max_sessions_per_day: number; // Max training sessions per day (default 1)
+    session_duration: number; // Hours per session (default 2)
     created_at: string;
 }
 
@@ -194,3 +196,92 @@ export interface AuthState {
     isOnboarded: boolean;
 }
 
+// ==========================================
+// SCHEDULING TYPES
+// ==========================================
+
+// Day of week: 0 = Sunday, 6 = Saturday
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface UserAvailability {
+    id: string;
+    user_id: string;
+    day_of_week: DayOfWeek;
+    start_time: string; // HH:MM format
+    end_time: string;
+    is_preferred: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CFIAvailability {
+    id: string;
+    cfi_id: string;
+    day_of_week: DayOfWeek;
+    start_time: string;
+    end_time: string;
+    max_students: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export type ScheduleStatus =
+    | 'scheduled'
+    | 'confirmed'
+    | 'completed'
+    | 'cancelled'
+    | 'weather_hold'
+    | 'rescheduled';
+
+export type ActivityType = 'flight' | 'ground' | 'sim' | 'exam_prep';
+
+export interface TrainingSchedule {
+    id: string;
+    user_id: string;
+    cfi_id: string | null;
+
+    // When
+    scheduled_date: string;
+    start_time: string;
+    end_time: string;
+
+    // What
+    activity_type: ActivityType;
+    task_id: string | null;
+    task_title: string | null;
+
+    // Status
+    status: ScheduleStatus;
+
+    // Weather
+    weather_conditions: object | null;
+    weather_suitable: boolean;
+
+    // Booking
+    aircraft_type: string | null;
+    notes: string | null;
+
+    // Timestamps
+    created_at: string;
+    updated_at: string;
+    completed_at: string | null;
+}
+
+export interface ScheduleGenerationLog {
+    id: string;
+    user_id: string;
+    generated_at: string;
+    schedule_start: string;
+    schedule_end: string;
+    entries_created: number;
+    generation_params: object;
+    weather_data: object | null;
+}
+
+// Time slot helper for UI
+export interface TimeSlot {
+    dayOfWeek: DayOfWeek;
+    startTime: string;
+    endTime: string;
+    isPreferred?: boolean;
+}

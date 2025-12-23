@@ -80,12 +80,6 @@ export default function StudentsScreen() {
                     {inviteCode ? (
                         <View style={styles.codeRow}>
                             <Text style={styles.inviteCode}>{inviteCode}</Text>
-                            <TouchableOpacity
-                                style={styles.regenerateBtn}
-                                onPress={handleGenerateCode}
-                            >
-                                <Text style={styles.regenerateText}>🔄 New</Text>
-                            </TouchableOpacity>
                         </View>
                     ) : (
                         <TouchableOpacity
@@ -96,7 +90,7 @@ export default function StudentsScreen() {
                         </TouchableOpacity>
                     )}
                     <Text style={styles.inviteHint}>
-                        Share this code with students to connect
+                        {inviteCode ? 'Your permanent code - share with students' : 'Generate a code to connect with students'}
                     </Text>
                 </Card>
 

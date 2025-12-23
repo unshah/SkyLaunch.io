@@ -103,6 +103,12 @@ export default function MainLayout() {
                     href: null, // About screen
                 }}
             />
+            <Tabs.Screen
+                name="availability"
+                options={{
+                    href: null, // Availability screen
+                }}
+            />
         </Tabs>
     );
 }

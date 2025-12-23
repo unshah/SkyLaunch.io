@@ -17,6 +17,7 @@ interface AuthStore extends AuthState {
     signOut: () => Promise<void>;
     fetchProfile: () => Promise<void>;
     fetchCFIProfile: () => Promise<void>;
+    updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: Error | null }>;
     setLoading: (loading: boolean) => void;
     initialize: () => Promise<void>;
 }
@@ -90,6 +91,27 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     signOut: async () => {
         await supabase.auth.signOut();
         set({ user: null, profile: null, cfiProfile: null, isOnboarded: false });
+    },
+
+    updateProfile: async (updates: Partial<UserProfile>) => {
+        const { user, profile } = get();
+        if (!user) return { error: new Error('Not authenticated') };
+
+        try {
+            const { error } = await supabase
+                .from(TABLES.PROFILES)
+                .update(updates)
+                .eq('id', user.id);
+
+            if (error) throw error;
+
+            // Update local state
+            set({ profile: { ...profile!, ...updates } });
+            return { error: null };
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            return { error: error as Error };
+        }
     },
 
     fetchProfile: async () => {

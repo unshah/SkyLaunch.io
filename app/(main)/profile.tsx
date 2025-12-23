@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,9 @@ import {
     ScrollView,
     SafeAreaView,
     TouchableOpacity,
+    TextInput,
+    Platform,
+    Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from '../../components/ui';
@@ -14,7 +17,23 @@ import { useAuthStore } from '../../stores/authStore';
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const { user, profile } = useAuthStore();
+    const { user, profile, updateProfile } = useAuthStore();
+    const [editingAirport, setEditingAirport] = useState(false);
+    const [airportValue, setAirportValue] = useState(profile?.home_airport || '');
+    const [saving, setSaving] = useState(false);
+
+    const handleSaveAirport = async () => {
+        setSaving(true);
+        const { error } = await updateProfile({ home_airport: airportValue.toUpperCase() });
+        setSaving(false);
+        if (error) {
+            Platform.OS === 'web'
+                ? window.alert('Failed to save')
+                : Alert.alert('Error', 'Failed to save');
+        } else {
+            setEditingAirport(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -50,6 +69,31 @@ export default function ProfileScreen() {
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Name</Text>
                         <Text style={styles.infoValue}>{profile?.full_name || 'Not set'}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Home Airport</Text>
+                        {editingAirport ? (
+                            <View style={styles.editRow}>
+                                <TextInput
+                                    style={styles.editInput}
+                                    value={airportValue}
+                                    onChangeText={setAirportValue}
+                                    placeholder="KJFK"
+                                    placeholderTextColor={colors.textTertiary}
+                                    autoCapitalize="characters"
+                                    maxLength={4}
+                                />
+                                <TouchableOpacity onPress={handleSaveAirport} disabled={saving}>
+                                    <Text style={styles.saveBtn}>{saving ? '...' : 'Save'}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={() => setEditingAirport(true)}>
+                                <Text style={[styles.infoValue, styles.editableValue]}>
+                                    {profile?.home_airport || 'Tap to set'} ✏️
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
                         <Text style={styles.infoLabel}>Member Since</Text>
@@ -206,5 +250,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
+    },
+    editRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    editInput: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text,
+        width: 70,
+        textAlign: 'center',
+    },
+    saveBtn: {
+        color: colors.secondary,
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    editableValue: {
+        color: colors.secondary,
     },
 });

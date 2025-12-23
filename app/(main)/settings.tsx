@@ -85,6 +85,48 @@ export default function SettingsScreen() {
                     </View>
                 </Card>
 
+                {/* Scheduling Section */}
+                <Text style={styles.sectionTitle}>Scheduling</Text>
+                <Card variant="outlined" style={styles.menuCard}>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => router.push('/(main)/schedule')}
+                    >
+                        <Text style={styles.menuText}>📅 My Training Schedule</Text>
+                        <Text style={styles.menuArrow}>→</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                        onPress={() => router.push('/(main)/availability')}
+                    >
+                        <Text style={styles.menuText}>⏰ Set Availability</Text>
+                        <Text style={styles.menuArrow}>→</Text>
+                    </TouchableOpacity>
+                </Card>
+
+                {/* Schedule Preferences */}
+                <Text style={styles.sectionTitle}>Schedule Preferences</Text>
+                <Card variant="outlined" style={styles.menuCard}>
+                    <View style={styles.preferenceRow}>
+                        <View style={styles.preferenceInfo}>
+                            <Text style={styles.preferenceLabel}>Max Sessions/Day</Text>
+                            <Text style={styles.preferenceDesc}>Limit training fatigue (1 recommended)</Text>
+                        </View>
+                        <View style={styles.preferenceValue}>
+                            <Text style={styles.preferenceNumber}>{profile?.max_sessions_per_day || 1}</Text>
+                        </View>
+                    </View>
+                    <View style={[styles.preferenceRow, { borderBottomWidth: 0 }]}>
+                        <View style={styles.preferenceInfo}>
+                            <Text style={styles.preferenceLabel}>Session Duration</Text>
+                            <Text style={styles.preferenceDesc}>Hours per training session</Text>
+                        </View>
+                        <View style={styles.preferenceValue}>
+                            <Text style={styles.preferenceNumber}>{profile?.session_duration || 2}h</Text>
+                        </View>
+                    </View>
+                </Card>
+
                 {/* App Section */}
                 <Text style={styles.sectionTitle}>App</Text>
                 <Card variant="outlined" style={styles.menuCard}>
@@ -92,12 +134,8 @@ export default function SettingsScreen() {
                         <Text style={styles.menuText}>🔔 Notifications</Text>
                         <Text style={styles.menuArrow}>→</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem}>
-                        <Text style={styles.menuText}>🎨 Appearance</Text>
-                        <Text style={styles.menuArrow}>→</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
-                        <Text style={styles.menuText}>📅 Calendar Sync</Text>
+                        <Text style={styles.menuText}>🎨 Appearance</Text>
                         <Text style={styles.menuArrow}>→</Text>
                     </TouchableOpacity>
                 </Card>
@@ -219,5 +257,38 @@ const styles = StyleSheet.create({
     // Sign Out
     signOutButton: {
         borderColor: colors.danger,
+    },
+    // Preference styles
+    preferenceRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
+    preferenceInfo: {
+        flex: 1,
+    },
+    preferenceLabel: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    preferenceDesc: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginTop: 2,
+    },
+    preferenceValue: {
+        backgroundColor: colors.secondary + '15',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    preferenceNumber: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.secondary,
     },
 });

@@ -56,6 +56,18 @@ export default function CFISettingsScreen() {
                     </TouchableOpacity>
                 </Card>
 
+                {/* Scheduling */}
+                <Text style={styles.sectionTitle}>Scheduling</Text>
+                <Card variant="outlined" style={styles.menuCard}>
+                    <TouchableOpacity
+                        style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                        onPress={() => router.push('/(cfi)/availability')}
+                    >
+                        <Text style={styles.menuText}>⏰ Set Availability</Text>
+                        <Text style={styles.menuArrow}>→</Text>
+                    </TouchableOpacity>
+                </Card>
+
                 {/* CFI Info */}
                 <Text style={styles.sectionTitle}>CFI Info</Text>
                 <Card variant="outlined" style={styles.profileCard}>
