@@ -20,6 +20,7 @@ import { useTaskStore } from '../../stores/taskStore';
 import { useStudentLinkStore } from '../../stores/studentLinkStore';
 import { fetchMetar, getWeatherSummary, isSuitableForTraining } from '../../lib/weather';
 import { getTrainingRecommendation } from '../../lib/weatherRecommendations';
+import { getRunwayHeadings, getBestRunwayForWind } from '../../lib/airport';
 import {
     getDaysSinceLastFlight,
     getAverageHoursPerWeek,
@@ -36,6 +37,7 @@ export default function DashboardScreen() {
     const { taskStatusByTitle, fetchUserTasks, getTaskStatus } = useTaskStore();
     const { linkedCFI, fetchLinkedCFI, linkWithCFI, isLoading: isLinking } = useStudentLinkStore();
     const [weather, setWeather] = useState<MetarData | null>(null);
+    const [runwayHeadings, setRunwayHeadings] = useState<number[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [cfiCode, setCfiCode] = useState('');
     const [showCodeInput, setShowCodeInput] = useState(false);
@@ -44,6 +46,10 @@ export default function DashboardScreen() {
         if (profile?.home_airport) {
             const data = await fetchMetar(profile.home_airport);
             setWeather(data);
+
+            // Also fetch runway data for crosswind calculation
+            const headings = await getRunwayHeadings(profile.home_airport);
+            setRunwayHeadings(headings);
         }
     };
 
@@ -82,8 +88,17 @@ export default function DashboardScreen() {
     const estimatedCompletion = getEstimatedCompletionDate(currentHours, hoursPerWeek);
     const paceStatus = getPaceStatus(daysSinceLastFlight, hoursPerWeek, profile?.weekly_hours || 2);
 
-    // Weather recommendation
-    const weatherRecommendation = weather ? getTrainingRecommendation(weather) : null;
+    // Weather recommendation with runway data for accurate crosswind
+    const bestRunway = weather && runwayHeadings.length > 0
+        ? getBestRunwayForWind(
+            runwayHeadings,
+            weather.wind_dir_degrees || 0,
+            weather.wind_gust_kt ?? weather.wind_speed_kt ?? 0
+        )
+        : null;
+    const weatherRecommendation = weather
+        ? getTrainingRecommendation(weather, bestRunway?.heading || 0)
+        : null;
 
     // Get incomplete tasks for "Today's Focus" - filter out completed ones
     const incompleteTasks = TRAINING_TASKS.filter(
@@ -215,6 +230,31 @@ export default function DashboardScreen() {
                                 <Text key={i} style={styles.activityItem}>• {activity}</Text>
                             ))}
                         </View>
+                        {/* Runway Info for Transparency */}
+                        {bestRunway && weather && (
+                            <View style={styles.runwayInfo}>
+                                <Text style={styles.runwayLabel}>
+                                    🛬 Using Runway {Math.round(bestRunway.heading / 10).toString().padStart(2, '0')}
+                                </Text>
+                                <Text style={styles.runwayCrosswind}>
+                                    Crosswind: {bestRunway.crosswind}kt
+                                </Text>
+                            </View>
+                        )}
+                        {!bestRunway && profile?.home_airport && runwayHeadings.length === 0 && (
+                            <View style={styles.runwayInfo}>
+                                <Text style={styles.runwayLabel}>
+                                    🛬 Loading runway data for {profile.home_airport}...
+                                </Text>
+                            </View>
+                        )}
+                        {!bestRunway && !profile?.home_airport && (
+                            <View style={styles.runwayInfo}>
+                                <Text style={styles.runwayLabel}>
+                                    📍 Set home airport for runway data
+                                </Text>
+                            </View>
+                        )}
                     </Card>
                 )}
 
@@ -653,6 +693,30 @@ const styles = StyleSheet.create({
     cfiPromptArrow: {
         fontSize: 18,
         color: colors.textSecondary,
+    },
+    // Runway info styles
+    runwayInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    runwayLabel: {
+        fontSize: 13,
+        color: colors.textSecondary,
+        fontWeight: '500',
+    },
+    runwayCrosswind: {
+        fontSize: 13,
+        color: colors.text,
+        fontWeight: '600',
+        backgroundColor: colors.surface,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
     },
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -30,7 +30,40 @@ const showConfirm = (title: string, message: string, onConfirm: () => void) => {
 
 export default function SettingsScreen() {
     const router = useRouter();
-    const { profile, signOut } = useAuthStore();
+    const { profile, signOut, updateProfile } = useAuthStore();
+
+    // Local state for preferences
+    const [maxSessions, setMaxSessions] = useState(profile?.max_sessions_per_day || 1);
+    const [sessionDuration, setSessionDuration] = useState(profile?.session_duration || 2);
+    const [saving, setSaving] = useState(false);
+
+    // Sync with profile on load
+    useEffect(() => {
+        if (profile) {
+            setMaxSessions(profile.max_sessions_per_day || 1);
+            setSessionDuration(profile.session_duration || 2);
+        }
+    }, [profile]);
+
+    const handleUpdateMaxSessions = async (delta: number) => {
+        const newValue = Math.max(1, Math.min(4, maxSessions + delta));
+        if (newValue === maxSessions) return;
+
+        setMaxSessions(newValue);
+        setSaving(true);
+        await updateProfile({ max_sessions_per_day: newValue });
+        setSaving(false);
+    };
+
+    const handleUpdateDuration = async (delta: number) => {
+        const newValue = Math.max(1, Math.min(4, sessionDuration + delta));
+        if (newValue === sessionDuration) return;
+
+        setSessionDuration(newValue);
+        setSaving(true);
+        await updateProfile({ session_duration: newValue });
+        setSaving(false);
+    };
 
     const handleSignOut = () => {
         showConfirm(
@@ -110,19 +143,51 @@ export default function SettingsScreen() {
                     <View style={styles.preferenceRow}>
                         <View style={styles.preferenceInfo}>
                             <Text style={styles.preferenceLabel}>Max Sessions/Day</Text>
-                            <Text style={styles.preferenceDesc}>Limit training fatigue (1 recommended)</Text>
+                            <Text style={styles.preferenceDesc}>Limit training fatigue (1-4)</Text>
                         </View>
-                        <View style={styles.preferenceValue}>
-                            <Text style={styles.preferenceNumber}>{profile?.max_sessions_per_day || 1}</Text>
+                        <View style={styles.stepperContainer}>
+                            <TouchableOpacity
+                                style={[styles.stepperBtn, maxSessions <= 1 && styles.stepperBtnDisabled]}
+                                onPress={() => handleUpdateMaxSessions(-1)}
+                                disabled={maxSessions <= 1 || saving}
+                            >
+                                <Text style={styles.stepperText}>−</Text>
+                            </TouchableOpacity>
+                            <View style={styles.stepperValue}>
+                                <Text style={styles.stepperNumber}>{maxSessions}</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={[styles.stepperBtn, maxSessions >= 4 && styles.stepperBtnDisabled]}
+                                onPress={() => handleUpdateMaxSessions(1)}
+                                disabled={maxSessions >= 4 || saving}
+                            >
+                                <Text style={styles.stepperText}>+</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <View style={[styles.preferenceRow, { borderBottomWidth: 0 }]}>
                         <View style={styles.preferenceInfo}>
                             <Text style={styles.preferenceLabel}>Session Duration</Text>
-                            <Text style={styles.preferenceDesc}>Hours per training session</Text>
+                            <Text style={styles.preferenceDesc}>Hours per session (1-4)</Text>
                         </View>
-                        <View style={styles.preferenceValue}>
-                            <Text style={styles.preferenceNumber}>{profile?.session_duration || 2}h</Text>
+                        <View style={styles.stepperContainer}>
+                            <TouchableOpacity
+                                style={[styles.stepperBtn, sessionDuration <= 1 && styles.stepperBtnDisabled]}
+                                onPress={() => handleUpdateDuration(-1)}
+                                disabled={sessionDuration <= 1 || saving}
+                            >
+                                <Text style={styles.stepperText}>−</Text>
+                            </TouchableOpacity>
+                            <View style={styles.stepperValue}>
+                                <Text style={styles.stepperNumber}>{sessionDuration}h</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={[styles.stepperBtn, sessionDuration >= 4 && styles.stepperBtnDisabled]}
+                                onPress={() => handleUpdateDuration(1)}
+                                disabled={sessionDuration >= 4 || saving}
+                            >
+                                <Text style={styles.stepperText}>+</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Card>
@@ -263,7 +328,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 4,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
     },
@@ -287,6 +353,41 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     preferenceNumber: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.secondary,
+    },
+    // Stepper styles
+    stepperContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    stepperBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: colors.secondary,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    stepperBtnDisabled: {
+        backgroundColor: colors.border,
+    },
+    stepperText: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: '700',
+    },
+    stepperValue: {
+        minWidth: 45,
+        alignItems: 'center',
+        backgroundColor: colors.secondary + '15',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    stepperNumber: {
         fontSize: 16,
         fontWeight: '700',
         color: colors.secondary,

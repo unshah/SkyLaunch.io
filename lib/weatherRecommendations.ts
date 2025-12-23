@@ -105,9 +105,29 @@ export function getTrainingRecommendation(
     // Check wind limits - default to 0 if null
     const windSpeed = weather.wind_gust_kt ?? weather.wind_speed_kt ?? 0;
     const windDir = weather.wind_dir_degrees ?? 0;
-    const crosswindCheck = runwayHeading > 0
-        ? isCrosswindSafe(windDir, windSpeed, runwayHeading, aircraftType)
-        : { safe: windSpeed <= 15, crosswind: 0, limit: 15 };
+
+    // Calculate crosswind component
+    // If no runway specified, assume worst case (direct crosswind = full wind speed)
+    // or use a typical runway alignment (most airports have N/S or E/W runways)
+    let crosswindCheck: { safe: boolean; crosswind: number; limit: number };
+    if (runwayHeading > 0) {
+        crosswindCheck = isCrosswindSafe(windDir, windSpeed, runwayHeading, aircraftType);
+    } else {
+        // Estimate crosswind by checking against typical runway headings (36, 27, 18, 09)
+        // Use the worst case crosswind among common headings
+        const typicalRunways = [0, 90, 180, 270]; // N, E, S, W
+        const crosswinds = typicalRunways.map(rwy =>
+            calculateCrosswind(windDir, windSpeed, rwy)
+        );
+        // Use the minimum crosswind (best runway choice)
+        const bestCrosswind = Math.min(...crosswinds);
+        const limit = CROSSWIND_LIMITS[aircraftType] || CROSSWIND_LIMITS.default;
+        crosswindCheck = {
+            safe: bestCrosswind <= limit,
+            crosswind: bestCrosswind,
+            limit,
+        };
+    }
 
     // High winds
     if (windSpeed > 25) {

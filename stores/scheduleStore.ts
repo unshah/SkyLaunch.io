@@ -7,7 +7,19 @@ import type {
     DayOfWeek,
     TimeSlot,
     ActivityType,
+    Endorsement,
+    GradeLevel,
 } from '../types';
+import {
+    buildProficiencyMap,
+    checkPrerequisitesMet,
+    determineLessonType,
+    getReinforcementManeuvers,
+    getTasksForReinforcement,
+    prioritizeByReinforcement,
+    generateLessonNote,
+    TASK_MANEUVER_MAP,
+} from '../lib/schedulerLogic';
 
 interface ScheduleStore {
     // State
@@ -265,13 +277,54 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
                     .map(t => t.task_id)
             );
 
-            // Separate tasks by type
-            const flightTasks = (allTasks || []).filter(t =>
+            // Build completed task titles for prerequisite checking
+            const completedTaskTitles = new Set(
+                (allTasks || [])
+                    .filter(t => completedTaskIds.has(t.id))
+                    .map(t => t.title)
+            );
+
+            // 4b. Fetch maneuver grades for adaptive scheduling
+            const { data: grades } = await supabase
+                .from('maneuver_grades')
+                .select('*, maneuver:maneuver_id (code, name)')
+                .eq('student_id', session.user.id)
+                .order('graded_at', { ascending: false });
+
+            const maneuverProficiency = buildProficiencyMap(grades || []);
+            console.log('Schedule generation - proficiency map size:', maneuverProficiency.size);
+
+            // 4c. Fetch endorsements for solo eligibility
+            const { data: endorsements } = await supabase
+                .from('endorsements')
+                .select('*')
+                .eq('student_id', session.user.id);
+
+            const studentEndorsements: Endorsement[] = endorsements || [];
+
+            // 4d. Get reinforcement needs
+            const reinforcementManeuvers = getReinforcementManeuvers(maneuverProficiency);
+            const reinforcementTaskTitles = getTasksForReinforcement(reinforcementManeuvers);
+            console.log('Schedule generation - reinforcement tasks:', reinforcementTaskTitles);
+
+            // Separate tasks by type and filter by prerequisites
+            const allFlightTasks = (allTasks || []).filter(t =>
                 t.category === 'flight' || t.category === 'simulator'
             );
-            const groundTasks = (allTasks || []).filter(t =>
+            const allGroundTasks = (allTasks || []).filter(t =>
                 t.category === 'ground_school' || t.category === 'exam'
             );
+
+            // Filter flight tasks by prerequisites
+            const eligibleFlightTasks = allFlightTasks.filter(t =>
+                checkPrerequisitesMet(t.title, completedTaskTitles, maneuverProficiency)
+            );
+
+            // Prioritize reinforcement tasks
+            const flightTasks = prioritizeByReinforcement(eligibleFlightTasks, reinforcementTaskTitles);
+            const groundTasks = allGroundTasks;
+
+            console.log('Schedule generation - eligible flight tasks:', flightTasks.length, 'of', allFlightTasks.length);
 
             // Map flight topics to related ground prep
             const groundPrepForFlight: Record<string, string[]> = {
@@ -369,7 +422,7 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
                     if (dailySessionCount >= maxSessionsPerDay) break;
                     if (flightTaskIndex >= flightTasks.length && groundTaskIndex >= groundTasks.length) break;
 
-                    let task;
+                    let task: typeof flightTasks[number] | typeof groundTasks[number] | undefined;
                     let activityType: ActivityType;
                     let notes: string | null = null;
                     const dayName = dayNames[dayOfWeek];
@@ -378,7 +431,19 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
                         // Good weather → schedule flight training
                         task = flightTasks[flightTaskIndex];
                         activityType = task.category === 'simulator' ? 'sim' : 'flight';
-                        notes = `☀️ ${dayName}: VFR weather expected - ideal for flight training`;
+
+                        // Determine if this can be solo or requires instructor
+                        const lessonType = determineLessonType(task.title, maneuverProficiency, studentEndorsements);
+                        const isReinforcement = reinforcementTaskTitles.includes(task.title);
+                        const taskReinforcementManeuvers = isReinforcement
+                            ? reinforcementManeuvers.filter(m => (TASK_MANEUVER_MAP[task.title] || []).includes(m))
+                            : [];
+
+                        notes = generateLessonNote(task.title, lessonType, isReinforcement, taskReinforcementManeuvers);
+                        if (weatherSuitable) {
+                            notes = `☀️ ${dayName}: ${notes}`;
+                        }
+
                         flightTaskIndex++;
                     } else if (!weatherSuitable && groundTaskIndex < groundTasks.length) {
                         // Bad weather → schedule ground school
@@ -408,10 +473,14 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
                         // Only flight tasks left, schedule with weather warning
                         task = flightTasks[flightTaskIndex];
                         activityType = task.category === 'simulator' ? 'sim' : 'flight';
+
+                        const lessonType = determineLessonType(task.title, maneuverProficiency, studentEndorsements);
+                        const isReinforcement = reinforcementTaskTitles.includes(task.title);
+
                         if (!weatherSuitable) {
-                            notes = `⚠️ ${dayName}: Weather marginal - verify forecast before flight`;
+                            notes = `⚠️ ${dayName}: Weather marginal - verify forecast • ${lessonType === 'solo' ? '✈️ Solo eligible' : '👨‍✈️ With instructor'}`;
                         } else {
-                            notes = `✈️ ${dayName}: Flight training scheduled`;
+                            notes = generateLessonNote(task.title, lessonType, isReinforcement, []);
                         }
                         flightTaskIndex++;
                     } else {
