@@ -2,9 +2,13 @@ import { Platform } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Supabase configuration
-const SUPABASE_URL = 'https://wzotkouzemmkwztvxmbp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6b3Rrb3V6ZW1ta3d6dHZ4bWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzNjE3NTksImV4cCI6MjA4MTkzNzc1OX0.vLghdJ6lccZRkWGqerviMv79PayS-T4OC0vJuvI7T9M';
+// Supabase configuration - loaded from environment variables
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.warn('Missing Supabase configuration. Please check your .env file.');
+}
 
 // Custom storage adapter that works on both web and native
 const ExpoSecureStoreAdapter = {

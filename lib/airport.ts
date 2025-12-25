@@ -70,8 +70,12 @@ export async function fetchAirportData(icaoCode: string): Promise<AirportData | 
     }
 
     try {
-        // AirportDB API endpoint with token
-        const AIRPORT_DB_TOKEN = '689958b2cb45818cd2fff52fad4f3d2846fa2c9a2e890d31b51687ce2ad395606fcbec474c980d46b514b4cd55253172';
+        // AirportDB API endpoint with token from environment
+        const AIRPORT_DB_TOKEN = process.env.EXPO_PUBLIC_AIRPORT_DB_TOKEN;
+        if (!AIRPORT_DB_TOKEN) {
+            console.warn('AirportDB token not configured. Runway data will be unavailable.');
+            return null;
+        }
         console.log('Calling AirportDB API for:', normalizedCode);
         const response = await fetch(
             `https://airportdb.io/api/v1/airport/${normalizedCode}?apiToken=${AIRPORT_DB_TOKEN}`,
