@@ -6,14 +6,14 @@ SkyLaunch is a mobile app that helps student pilots manage their Private Pilot L
 
 It is an open-source web application designed to help student pilots and CFIs manage their training journey with intelligent scheduling, real-time weather integration, and progress tracking.
 
-Built and maintained by Ujjwal Shah (https://ushah.me) a private pilot and software engineer, SkyLaunch focuses on practical impact, clean architecture, and real-world usability. It is currently in active development and is available for free on the App Store and Google Play.
+Built and maintained by Ujjwal Shah (https://ushah.me) a private pilot and software engineer, SkyLaunch focuses on practical impact, clean architecture, and real-world usability. The application represents an original software contribution combining aviation domain expertise with modern software architecture to improve flight training outcomes. It is currently in active development and is distributed free of charge on App Store and Google Play.
 
 ### Why Skylauch Exists
 
 - Many student pilots and CFIs face challenges in managing their training journey. 
 - Limited visibility or insights
 - Poor user experience
-- I myself faced these challenges and I wanted to solve them for the community. If it helps even one person, it was worth it.
+- I myself faced these challenges and I wanted to solve them for the community.
 
 Existing tools often:
 
@@ -21,11 +21,11 @@ Existing tools often:
  - Require heavy customization
  - Do not scale well for smaller teams or individual users
 
-Skylauch was created to solve this gap with a lightweight, extensible, and accessible approach.
+Skylauch was created to solve this gap with a lightweight, extensible, and accessible approach. The project was developed to address widely observed inefficiencies in student pilot training workflows and to provide a scalable, accessible alternative for the aviation training community.
 
 ### Key Contributions & Innovations
 
-SkyLaunch introduces several original technical and architectural contributions, including:
+SkyLaunch introduces several original technical and architectural contributions developed specifically for general aviation training workflows, including:
 
 ⚙️ [Adaptive Scheduling] – Weather-aware scheduling, intelligent prioritization, and prerequisite tracking
 
@@ -35,14 +35,25 @@ SkyLaunch introduces several original technical and architectural contributions,
 
 These design decisions were developed through hands-on experience building production systems and reflect real-world constraints rather than theoretical implementations.
 
+## Leadership & Stewardship
+
+This project is Conceptualized, Architected, Implemented and Maintained by [Ujjwal Shah](https://ushah.me).
+
+### Responsibilities include:
+
+- Technical direction
+- Code review and contributor guidance
+- Documentation and educational content
+- Long-term roadmap planning
+
+---
+
 <p align="center">
   <img src="https://img.shields.io/badge/Expo-~54.0.30-blue?logo=expo" alt="Expo" />
   <img src="https://img.shields.io/badge/React%20Native-0.81.5-blue?logo=react" alt="React Native" />
   <img src="https://img.shields.io/badge/TypeScript-~5.9.2-blue?logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Supabase-^2.89.0-green?logo=supabase" alt="Supabase" />
 </p>
-
----
 
 ## ✨ Features
 
@@ -108,7 +119,14 @@ app-src/
 
 ### Real-World Impact
 
-- To be determined...
+- SkyLaunch is currently in early public release and active development.
+
+Early impact includes:
+- Adoption by student pilots during PPL training
+- Usage by CFIs for structured student progress tracking
+- Community feedback informing roadmap priorities
+
+As the project matures, additional impact metrics (usage, adoption, and community contributions) will be documented publicly.
 
 ## 🚀 Getting Started
 
@@ -123,8 +141,8 @@ app-src/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/skylaunch.git
-   cd skylaunch/app-src
+   git clone https://github.com/yourusername/SkyLaunch.git
+   cd SkyLaunch/app-src
    ```
 
 2. **Install dependencies**
@@ -222,17 +240,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 Made with ❤️ for student pilots everywhere.
-
-### Leadership & Stewardship
-
-This project is Conceptualized, Architected, Implemented and Maintained by [Ujjwal Shah](https://ushah.me).
-
-### Responsibilities include:
-
-- Technical direction
-- Code review and contributor guidance
-- Documentation and educational content
-- Long-term roadmap planning
 
 ---
 
