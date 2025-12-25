@@ -2,6 +2,8 @@
   "name": "app-src",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "license": "MIT",
+  "author": "Ujjwal Shah <ujjwal@ushah.me>",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
