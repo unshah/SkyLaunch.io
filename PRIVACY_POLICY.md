@@ -135,13 +135,21 @@ We may share your information only in the following circumstances:
 You can access and update your profile information directly within the app through the Settings screen.
 
 ### Data Deletion
-You may request deletion of your account and associated data by contacting us at the email address provided below. Upon account deletion:
+
+**To request deletion of your account and all associated data, please email:**
+
+📧 **[Delete My Account](mailto:launch@skylaunch.io?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20SkyLaunch%20account%20and%20all%20associated%20data.%0A%0AEmail%20associated%20with%20account%3A%20%5Byour%20email%5D)**
+
+Or send an email to: **launch@skylaunch.io** with the subject line "Account Deletion Request"
+
+Upon account deletion:
 - Your profile and personal information will be permanently removed
 - Your flight logs and training records will be deleted
 - Any CFI-student relationships will be terminated
+- We will process your request within 30 days
 
 ### Data Portability
-You may request a copy of your data in a portable format.
+You may request a copy of your data in a portable format by emailing **launch@skylaunch.io**.
 
 ---
 

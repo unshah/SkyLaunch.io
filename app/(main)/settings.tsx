@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     Alert,
     Platform,
+    Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card, Button } from '../../components/ui';
@@ -214,6 +215,10 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(main)/help-support')}>
                         <Text style={styles.menuText}>❓ Help & Support</Text>
+                        <Text style={styles.menuArrow}>→</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => Linking.openURL('https://skylaunch.io/feedback.html')}>
+                        <Text style={styles.menuText}>💬 Give Feedback</Text>
                         <Text style={styles.menuArrow}>→</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={() => router.push('/(main)/privacy-policy')}>

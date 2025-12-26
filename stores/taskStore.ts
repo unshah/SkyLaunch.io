@@ -96,32 +96,22 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
                 (ut: any) => ut.task_id === taskData.id || ut.training_task?.id === taskData.id
             );
 
-            if (existingTask) {
-                // Update existing
-                const { error } = await supabase
-                    .from(TABLES.USER_TASKS)
-                    .update({
-                        status,
-                        notes: notes || existingTask.notes,
-                        completed_date: status === 'completed' ? new Date().toISOString().split('T')[0] : null,
-                    })
-                    .eq('id', existingTask.id);
+            // Use upsert to handle both insert and update cases
+            // This avoids duplicate key errors when local state is out of sync
+            const { error } = await supabase
+                .from(TABLES.USER_TASKS)
+                .upsert({
+                    user_id: session.user.id,
+                    task_id: taskData.id,
+                    status,
+                    notes: notes || existingTask?.notes,
+                    completed_date: status === 'completed' ? new Date().toISOString().split('T')[0] : null,
+                }, {
+                    onConflict: 'user_id,task_id',
+                    ignoreDuplicates: false,
+                });
 
-                if (error) throw error;
-            } else {
-                // Insert new
-                const { error } = await supabase
-                    .from(TABLES.USER_TASKS)
-                    .insert({
-                        user_id: session.user.id,
-                        task_id: taskData.id,
-                        status,
-                        notes,
-                        completed_date: status === 'completed' ? new Date().toISOString().split('T')[0] : null,
-                    });
-
-                if (error) throw error;
-            }
+            if (error) throw error;
 
             // Update local state immediately
             set((state) => ({

@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     Alert,
     Platform,
+    Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card, Button } from '../../components/ui';
@@ -100,8 +101,12 @@ export default function CFISettingsScreen() {
                 {/* App */}
                 <Text style={styles.sectionTitle}>App</Text>
                 <Card variant="outlined" style={styles.menuCard}>
-                    <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
+                    <TouchableOpacity style={styles.menuItem}>
                         <Text style={styles.menuText}>🔔 Notifications</Text>
+                        <Text style={styles.menuArrow}>→</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={() => Linking.openURL('https://skylaunch.io/feedback.html')}>
+                        <Text style={styles.menuText}>💬 Give Feedback</Text>
                         <Text style={styles.menuArrow}>→</Text>
                     </TouchableOpacity>
                 </Card>
