@@ -99,12 +99,29 @@ export default function GradeFlightScreen() {
         setIsSubmitting(true);
 
         try {
-            // First create the flight log entry for the student
+            // Build grade summary for audit trail
+            const gradeLabels: Record<string, string> = {
+                proficient: '✓ Proficient',
+                satisfactory: '○ Satisfactory',
+                needs_work: '⚠ Needs Work',
+                introduced: '📚 Introduced',
+            };
+
+            const gradeSummary = gradedManeuvers.map(([maneuverId, grade]) => {
+                const maneuver = maneuvers.find(m => m.id === maneuverId);
+                const maneuverNote = notes[maneuverId] ? ` - ${notes[maneuverId]}` : '';
+                return `• ${maneuver?.name || 'Unknown'}: ${gradeLabels[grade] || grade}${maneuverNote}`;
+            }).join('\n');
+
+            const flightNotes = `CFI Flight Training - Graded ${gradedManeuvers.length} maneuvers:\n\n${gradeSummary}`;
+
+            // First create the flight log entry for the student with grade summary
             const flightResult = await createStudentFlight(
                 studentId,
                 flightDate,
                 duration,
-                departureAirport.trim()
+                departureAirport.trim(),
+                flightNotes
             );
 
             if (flightResult.error) {

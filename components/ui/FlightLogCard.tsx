@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors } from '../../constants/Colors';
 import type { FlightConditions } from '../../types';
@@ -41,6 +41,7 @@ export function FlightLogCard({
     onPress,
     onDelete,
 }: FlightLogCardProps) {
+    const [isExpanded, setIsExpanded] = useState(false);
     const condConfig = CONDITIONS_CONFIG[conditions];
     const formattedDate = new Date(flightDate).toLocaleDateString('en-US', {
         month: 'short',
@@ -48,12 +49,21 @@ export function FlightLogCard({
         year: 'numeric',
     });
 
+    // Check if this is a CFI graded flight (has graded maneuvers in notes)
+    const isCFIGraded = notes?.includes('CFI Flight Training - Graded');
+
+    const handlePress = () => {
+        if (notes) {
+            setIsExpanded(!isExpanded);
+        }
+        onPress?.();
+    };
+
     return (
         <TouchableOpacity
             style={styles.container}
-            onPress={onPress}
+            onPress={handlePress}
             activeOpacity={0.8}
-            disabled={!onPress}
         >
             {/* Header */}
             <View style={styles.header}>
@@ -94,6 +104,12 @@ export function FlightLogCard({
                         <Text style={[styles.badgeText, { color: colors.accent }]}>XC</Text>
                     </View>
                 )}
+
+                {isCFIGraded && (
+                    <View style={[styles.badge, { backgroundColor: '#9333ea20' }]}>
+                        <Text style={[styles.badgeText, { color: '#9333ea' }]}>👨‍✈️ CFI Graded</Text>
+                    </View>
+                )}
             </View>
 
             {/* Instructor */}
@@ -101,16 +117,26 @@ export function FlightLogCard({
                 <Text style={styles.instructor}>Instructor: {instructorName}</Text>
             )}
 
-            {/* Notes preview */}
+            {/* Notes - Expandable */}
             {notes && (
-                <Text style={styles.notes} numberOfLines={2}>
-                    {notes}
-                </Text>
+                <View style={styles.notesContainer}>
+                    <Text
+                        style={[styles.notes, isExpanded && styles.notesExpanded]}
+                        numberOfLines={isExpanded ? undefined : 2}
+                    >
+                        {notes}
+                    </Text>
+                    {notes.length > 80 && (
+                        <Text style={styles.expandHint}>
+                            {isExpanded ? 'Tap to collapse' : 'Tap to expand'}
+                        </Text>
+                    )}
+                </View>
             )}
 
             {/* Delete button */}
             {onDelete && (
-                <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
+                <TouchableOpacity style={styles.deleteBtn} onPress={(e) => { e.stopPropagation?.(); onDelete(); }}>
                     <Text style={styles.deleteText}>Delete</Text>
                 </TouchableOpacity>
             )}
@@ -185,7 +211,20 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: colors.textTertiary,
         fontStyle: 'italic',
+    },
+    notesContainer: {
         marginTop: 8,
+    },
+    notesExpanded: {
+        fontStyle: 'normal',
+        color: colors.textSecondary,
+        lineHeight: 20,
+    },
+    expandHint: {
+        fontSize: 11,
+        color: colors.secondary,
+        marginTop: 4,
+        fontWeight: '500',
     },
     deleteBtn: {
         marginTop: 12,
