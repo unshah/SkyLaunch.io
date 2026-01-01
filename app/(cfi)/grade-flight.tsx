@@ -49,12 +49,13 @@ export default function GradeFlightScreen() {
     const { studentId, studentName } = useLocalSearchParams<{ studentId: string; studentName: string }>();
     const router = useRouter();
     const { cfiProfile } = useAuthStore();
-    const { maneuvers, fetchManeuvers, gradeManeuver } = useCFIStore();
+    const { maneuvers, fetchManeuvers, gradeManeuver, createStudentFlight } = useCFIStore();
 
     const [selectedGrades, setSelectedGrades] = useState<Record<string, GradeLevel>>({});
     const [notes, setNotes] = useState<Record<string, string>>({});
     const [flightDate, setFlightDate] = useState(new Date().toISOString().split('T')[0]);
     const [flightDuration, setFlightDuration] = useState('1.2');
+    const [departureAirport, setDepartureAirport] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -84,17 +85,42 @@ export default function GradeFlightScreen() {
             return;
         }
 
+        const duration = parseFloat(flightDuration);
+        if (isNaN(duration) || duration <= 0) {
+            showAlert('Invalid Duration', 'Please enter a valid flight duration');
+            return;
+        }
+
+        if (!departureAirport.trim()) {
+            showAlert('Missing Airport', 'Please enter the departure airport');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
-            // Submit each grade
+            // First create the flight log entry for the student
+            const flightResult = await createStudentFlight(
+                studentId,
+                flightDate,
+                duration,
+                departureAirport.trim()
+            );
+
+            if (flightResult.error) {
+                throw flightResult.error;
+            }
+
+            const flightLogId = flightResult.flightLogId;
+
+            // Submit each grade linked to this flight
             for (const [maneuverId, grade] of gradedManeuvers) {
                 const result = await gradeManeuver(
                     studentId,
                     cfiProfile.id,
                     maneuverId,
                     grade,
-                    undefined,
+                    flightLogId || undefined,
                     notes[maneuverId]
                 );
 
@@ -103,11 +129,11 @@ export default function GradeFlightScreen() {
                 }
             }
 
-            showAlert('Success', `Graded ${gradedManeuvers.length} maneuvers for ${studentName}`);
+            showAlert('Success', `Flight logged and ${gradedManeuvers.length} maneuvers graded for ${studentName}`);
             router.back();
         } catch (error) {
             console.error('Error submitting grades:', error);
-            showAlert('Error', 'Failed to submit grades');
+            showAlert('Error', 'Failed to submit. Please check if the CFI flight logging policy is enabled in your database.');
         } finally {
             setIsSubmitting(false);
         }
@@ -156,6 +182,20 @@ export default function GradeFlightScreen() {
                                 keyboardType="decimal-pad"
                                 placeholder="1.2"
                                 placeholderTextColor={colors.textTertiary}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.infoRow}>
+                        <View style={styles.infoField}>
+                            <Text style={styles.infoLabel}>Departure Airport</Text>
+                            <TextInput
+                                style={styles.infoInput}
+                                value={departureAirport}
+                                onChangeText={setDepartureAirport}
+                                placeholder="KJFK"
+                                placeholderTextColor={colors.textTertiary}
+                                autoCapitalize="characters"
+                                maxLength={4}
                             />
                         </View>
                     </View>

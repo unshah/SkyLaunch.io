@@ -13,7 +13,8 @@ export default function MainLayout() {
                     backgroundColor: colors.surface,
                     borderTopColor: colors.border,
                     paddingTop: 8,
-                    height: 88,
+                    paddingBottom: 24,
+                    height: 100,
                 },
                 tabBarLabelStyle: {
                     fontSize: 12,

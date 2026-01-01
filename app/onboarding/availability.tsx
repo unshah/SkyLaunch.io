@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: 16,
-        paddingBottom: 32,
+        paddingBottom: 48,
     },
     // Progress
     progress: {
@@ -188,33 +188,38 @@ const styles = StyleSheet.create({
     // Hours
     hoursGrid: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 8,
     },
     hoursOption: {
         flex: 1,
         backgroundColor: colors.surface,
         borderRadius: 12,
-        padding: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 8,
         alignItems: 'center',
+        justifyContent: 'center',
         borderWidth: 2,
         borderColor: colors.border,
+        minHeight: 80,
     },
     hoursSelected: {
         borderColor: colors.secondary,
         backgroundColor: colors.secondaryLight + '10',
     },
     hoursText: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: '800',
         color: colors.text,
+        lineHeight: 26,
     },
     hoursTextSelected: {
         color: colors.secondary,
     },
     hoursLabel: {
-        fontSize: 11,
+        fontSize: 12,
         color: colors.textSecondary,
-        marginTop: 4,
+        marginTop: 2,
+        textAlign: 'center',
     },
     hoursLabelSelected: {
         color: colors.secondary,

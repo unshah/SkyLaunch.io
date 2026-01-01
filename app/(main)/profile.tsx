@@ -20,6 +20,8 @@ export default function ProfileScreen() {
     const { user, profile, updateProfile } = useAuthStore();
     const [editingAirport, setEditingAirport] = useState(false);
     const [airportValue, setAirportValue] = useState(profile?.home_airport || '');
+    const [editingName, setEditingName] = useState(false);
+    const [nameValue, setNameValue] = useState(profile?.full_name || '');
     const [saving, setSaving] = useState(false);
 
     const handleSaveAirport = async () => {
@@ -32,6 +34,20 @@ export default function ProfileScreen() {
                 : Alert.alert('Error', 'Failed to save');
         } else {
             setEditingAirport(false);
+        }
+    };
+
+    const handleSaveName = async () => {
+        if (!nameValue.trim()) return;
+        setSaving(true);
+        const { error } = await updateProfile({ full_name: nameValue.trim() });
+        setSaving(false);
+        if (error) {
+            Platform.OS === 'web'
+                ? window.alert('Failed to save')
+                : Alert.alert('Error', 'Failed to save');
+        } else {
+            setEditingName(false);
         }
     };
 
@@ -68,7 +84,30 @@ export default function ProfileScreen() {
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Name</Text>
-                        <Text style={styles.infoValue}>{profile?.full_name || 'Not set'}</Text>
+                        {editingName ? (
+                            <View style={styles.editRow}>
+                                <TextInput
+                                    style={[styles.editInput, styles.nameInput]}
+                                    value={nameValue}
+                                    onChangeText={setNameValue}
+                                    placeholder="Your name"
+                                    placeholderTextColor={colors.textTertiary}
+                                    autoCapitalize="words"
+                                />
+                                <TouchableOpacity onPress={handleSaveName} disabled={saving || !nameValue.trim()}>
+                                    <Text style={styles.saveBtn}>{saving ? '...' : 'Save'}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={() => {
+                                setNameValue(profile?.full_name || '');
+                                setEditingName(true);
+                            }}>
+                                <Text style={[styles.infoValue, styles.editableValue]}>
+                                    {profile?.full_name || 'Tap to set'} ✏️
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Home Airport</Text>
@@ -276,5 +315,9 @@ const styles = StyleSheet.create({
     },
     editableValue: {
         color: colors.secondary,
+    },
+    nameInput: {
+        width: 150,
+        textAlign: 'left',
     },
 });

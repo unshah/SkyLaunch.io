@@ -116,10 +116,10 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingHorizontal: width * 0.2,
+        paddingHorizontal: width * 0.08,
         justifyContent: 'space-between',
         paddingTop: 40,
-        paddingBottom: 32,
+        paddingBottom: 48,
     },
     // Decorative elements
     decorCircle1: {

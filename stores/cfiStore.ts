@@ -23,6 +23,13 @@ interface CFIStore {
     generateInviteCode: () => Promise<string | null>;
     getStudentGrades: (studentId: string) => Promise<ManeuverGrade[]>;
     getStudentFlights: (studentId: string) => Promise<FlightLogEntry[]>;
+    createStudentFlight: (
+        studentId: string,
+        flightDate: string,
+        duration: number,
+        departureAirport: string,
+        notes?: string
+    ) => Promise<{ flightLogId: string | null; error: Error | null }>;
     gradeManeuver: (
         studentId: string,
         cfiId: string,
@@ -169,6 +176,35 @@ export const useCFIStore = create<CFIStore>((set, get) => ({
         } catch (error) {
             console.error('Error fetching student flights:', error);
             return [];
+        }
+    },
+
+    createStudentFlight: async (
+        studentId: string,
+        flightDate: string,
+        duration: number,
+        departureAirport: string,
+        notes?: string
+    ) => {
+        try {
+            const { data, error } = await supabase
+                .from('flight_log')
+                .insert({
+                    user_id: studentId,
+                    flight_date: flightDate,
+                    duration_hours: duration,
+                    departure_airport: departureAirport.toUpperCase() || 'ZZZZ',
+                    notes: notes || null,
+                })
+                .select('id')
+                .single();
+
+            if (error) throw error;
+
+            return { flightLogId: data?.id || null, error: null };
+        } catch (error) {
+            console.error('Error creating student flight:', error);
+            return { flightLogId: null, error: error as Error };
         }
     },
 

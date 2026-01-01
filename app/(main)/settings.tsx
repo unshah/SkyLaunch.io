@@ -9,6 +9,8 @@ import {
     Alert,
     Platform,
     Linking,
+    Modal,
+    TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card, Button } from '../../components/ui';
@@ -38,13 +40,26 @@ export default function SettingsScreen() {
     const [sessionDuration, setSessionDuration] = useState(profile?.session_duration || 2);
     const [saving, setSaving] = useState(false);
 
+    // Name editing state
+    const [showNameModal, setShowNameModal] = useState(false);
+    const [editName, setEditName] = useState(profile?.full_name || '');
+
     // Sync with profile on load
     useEffect(() => {
         if (profile) {
             setMaxSessions(profile.max_sessions_per_day || 1);
             setSessionDuration(profile.session_duration || 2);
+            setEditName(profile.full_name || '');
         }
     }, [profile]);
+
+    const handleSaveName = async () => {
+        if (!editName.trim()) return;
+        setSaving(true);
+        await updateProfile({ full_name: editName.trim() });
+        setSaving(false);
+        setShowNameModal(false);
+    };
 
     const handleUpdateMaxSessions = async (delta: number) => {
         const newValue = Math.max(1, Math.min(4, maxSessions + delta));
@@ -239,6 +254,46 @@ export default function SettingsScreen() {
                     style={styles.signOutButton}
                 />
             </ScrollView>
+
+            {/* Name Edit Modal */}
+            <Modal
+                visible={showNameModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowNameModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Edit Name</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            value={editName}
+                            onChangeText={setEditName}
+                            placeholder="Enter your name"
+                            placeholderTextColor={colors.textTertiary}
+                            autoFocus
+                            autoCapitalize="words"
+                        />
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={styles.modalCancelBtn}
+                                onPress={() => setShowNameModal(false)}
+                            >
+                                <Text style={styles.modalCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalSaveBtn, saving && styles.modalSaveBtnDisabled]}
+                                onPress={handleSaveName}
+                                disabled={saving || !editName.trim()}
+                            >
+                                <Text style={styles.modalSaveText}>
+                                    {saving ? 'Saving...' : 'Save'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -396,5 +451,78 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
         color: colors.secondary,
+    },
+    // Menu item extras
+    menuItemLeft: {
+        flex: 1,
+    },
+    menuSubtext: {
+        fontSize: 13,
+        color: colors.textSecondary,
+        marginTop: 2,
+    },
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: colors.surface,
+        borderRadius: 16,
+        padding: 24,
+        width: '100%',
+        maxWidth: 400,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    modalInput: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        color: colors.text,
+        marginBottom: 20,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modalCancelBtn: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        alignItems: 'center',
+    },
+    modalCancelText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.textSecondary,
+    },
+    modalSaveBtn: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        backgroundColor: colors.secondary,
+        alignItems: 'center',
+    },
+    modalSaveBtnDisabled: {
+        backgroundColor: colors.border,
+    },
+    modalSaveText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.textInverse,
     },
 });

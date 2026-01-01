@@ -90,7 +90,10 @@ export default function GoalScreen() {
                                     ]}>
                                         {goal.title}
                                     </Text>
-                                    <Text style={styles.optionSubtitle}>{goal.subtitle}</Text>
+                                    <Text style={[
+                                        styles.optionSubtitle,
+                                        goal.disabled && styles.optionDisabledText,
+                                    ]}>{goal.subtitle}</Text>
                                 </View>
                                 <Text style={[
                                     styles.optionDescription,
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: 16,
-        paddingBottom: 32,
+        paddingBottom: 48,
     },
     // Progress
     progress: {
@@ -189,7 +192,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.secondaryLight + '10',
     },
     optionDisabled: {
-        opacity: 0.5,
+        opacity: 0.6,
+        backgroundColor: colors.border + '30',
     },
     optionEmoji: {
         fontSize: 32,
@@ -201,7 +205,8 @@ const styles = StyleSheet.create({
     optionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        flexWrap: 'wrap',
+        gap: 6,
         marginBottom: 4,
     },
     optionTitle: {
@@ -210,7 +215,7 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     optionSubtitle: {
-        fontSize: 12,
+        fontSize: 11,
         color: colors.textSecondary,
     },
     optionDescription: {
