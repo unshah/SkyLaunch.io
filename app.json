@@ -33,6 +33,12 @@
     "plugins": [
       "expo-router"
     ],
+    "updates": {
+      "url": "https://u.expo.dev/8efd844c-cae6-41ca-aaf6-38e2fd17fc70"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "experiments": {
       "typedRoutes": true
     },
