@@ -20,6 +20,7 @@ export default function LoginScreen() {
     const { signIn, isLoading } = useAuthStore();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -72,14 +73,22 @@ export default function LoginScreen() {
 
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Password</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={password}
-                                onChangeText={setPassword}
-                                placeholder="Enter your password"
-                                placeholderTextColor={colors.textTertiary}
-                                secureTextEntry
-                            />
+                            <View style={styles.passwordContainer}>
+                                <TextInput
+                                    style={styles.passwordInput}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    placeholder="Enter your password"
+                                    placeholderTextColor={colors.textTertiary}
+                                    secureTextEntry={!showPassword}
+                                />
+                                <TouchableOpacity
+                                    style={styles.eyeButton}
+                                    onPress={() => setShowPassword(!showPassword)}
+                                >
+                                    <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         <TouchableOpacity style={styles.forgotPassword}>
@@ -169,6 +178,28 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         fontSize: 16,
         color: colors.text,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+    },
+    passwordInput: {
+        flex: 1,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        fontSize: 16,
+        color: colors.text,
+    },
+    eyeButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 14,
+    },
+    eyeIcon: {
+        fontSize: 18,
     },
     forgotPassword: {
         alignSelf: 'flex-end',
