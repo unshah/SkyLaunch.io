@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { Card } from '../../components/ui';
 import { colors } from '../../constants/Colors';
 import { useAuthStore } from '../../stores/authStore';
+import { supabase } from '../../lib/supabase';
 
 export default function CFIProfileScreen() {
     const router = useRouter();
@@ -26,6 +27,8 @@ export default function CFIProfileScreen() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [resettingPassword, setResettingPassword] = useState(false);
+    const [resetEmailSent, setResetEmailSent] = useState(false);
 
     const handleSaveAirport = async () => {
         setSaving(true);
@@ -53,6 +56,42 @@ export default function CFIProfileScreen() {
                 : Alert.alert('Error', 'Failed to delete account: ' + error.message);
         } else {
             setShowDeleteModal(false);
+        }
+    };
+
+    const handleResetPassword = () => {
+        if (!user?.email) return;
+
+        const sendResetEmail = async () => {
+            setResettingPassword(true);
+            const { error } = await supabase.auth.resetPasswordForEmail(user.email!);
+            setResettingPassword(false);
+
+            if (error) {
+                Platform.OS === 'web'
+                    ? window.alert('Failed to send reset email: ' + error.message)
+                    : Alert.alert('Error', 'Failed to send reset email: ' + error.message);
+            } else {
+                setResetEmailSent(true);
+                Platform.OS === 'web'
+                    ? window.alert('Password reset email sent! Check your inbox.')
+                    : Alert.alert('Success', 'Password reset email sent! Check your inbox.');
+            }
+        };
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`Send password reset email to ${user.email}?`)) {
+                sendResetEmail();
+            }
+        } else {
+            Alert.alert(
+                'Reset Password',
+                `Send password reset email to ${user.email}?`,
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Send', onPress: sendResetEmail },
+                ]
+            );
         }
     };
 
@@ -162,6 +201,36 @@ export default function CFIProfileScreen() {
                         </View>
                         <Text style={styles.currentBadge}>Current</Text>
                     </TouchableOpacity>
+                </Card>
+
+                {/* Security Section */}
+                <Text style={styles.sectionTitle}>Security</Text>
+                <Card variant="outlined" style={styles.securityCard}>
+                    <View style={styles.securityRow}>
+                        <View style={styles.securityInfo}>
+                            <Text style={styles.securityLabel}>Password</Text>
+                            <Text style={styles.securityDesc}>Send a password reset link to your email</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={[
+                                styles.resetBtn,
+                                (resettingPassword || resetEmailSent) && styles.resetBtnDisabled
+                            ]}
+                            onPress={handleResetPassword}
+                            disabled={resettingPassword || resetEmailSent}
+                        >
+                            {resettingPassword ? (
+                                <ActivityIndicator color={colors.secondary} size="small" />
+                            ) : (
+                                <Text style={[
+                                    styles.resetBtnText,
+                                    resetEmailSent && styles.resetBtnTextSent
+                                ]}>
+                                    {resetEmailSent ? '✓ Email Sent' : 'Reset'}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
                 </Card>
 
                 {/* Danger Zone */}
@@ -516,5 +585,47 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: 'white',
+    },
+    // Security styles
+    securityCard: {
+        marginBottom: 24,
+    },
+    securityRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    securityInfo: {
+        flex: 1,
+        marginRight: 16,
+    },
+    securityLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+        marginBottom: 4,
+    },
+    securityDesc: {
+        fontSize: 12,
+        color: colors.textSecondary,
+    },
+    resetBtn: {
+        backgroundColor: colors.secondary + '15',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+        minWidth: 80,
+        alignItems: 'center',
+    },
+    resetBtnDisabled: {
+        backgroundColor: colors.success + '15',
+    },
+    resetBtnText: {
+        color: colors.secondary,
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    resetBtnTextSent: {
+        color: colors.success,
     },
 });
