@@ -15,6 +15,7 @@ interface AuthStore extends AuthState {
     signUp: (email: string, password: string, name?: string) => Promise<{ error: Error | null }>;
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
     signOut: () => Promise<void>;
+    deleteAccount: () => Promise<{ error: Error | null }>;
     fetchProfile: () => Promise<void>;
     fetchCFIProfile: () => Promise<void>;
     updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: Error | null }>;
@@ -91,6 +92,60 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     signOut: async () => {
         await supabase.auth.signOut();
         set({ user: null, profile: null, cfiProfile: null, isOnboarded: false });
+    },
+
+    deleteAccount: async () => {
+        const { user } = get();
+        if (!user) return { error: new Error('Not authenticated') };
+
+        try {
+            set({ isLoading: true });
+
+            // Delete user data from all tables
+            // The order matters due to foreign key constraints
+            // flight_log and user_tasks reference profiles, so delete them first
+
+            // Delete flight logs
+            const { error: flightLogError } = await supabase
+                .from(TABLES.FLIGHT_LOG)
+                .delete()
+                .eq('user_id', user.id);
+
+            if (flightLogError) {
+                console.error('Error deleting flight logs:', flightLogError);
+            }
+
+            // Delete user tasks
+            const { error: userTasksError } = await supabase
+                .from(TABLES.USER_TASKS)
+                .delete()
+                .eq('user_id', user.id);
+
+            if (userTasksError) {
+                console.error('Error deleting user tasks:', userTasksError);
+            }
+
+            // Delete profile (this will cascade due to ON DELETE CASCADE from auth.users)
+            const { error: profileError } = await supabase
+                .from(TABLES.PROFILES)
+                .delete()
+                .eq('id', user.id);
+
+            if (profileError) {
+                throw profileError;
+            }
+
+            // Sign out the user
+            await supabase.auth.signOut();
+            set({ user: null, profile: null, cfiProfile: null, isOnboarded: false });
+
+            return { error: null };
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            return { error: error as Error };
+        } finally {
+            set({ isLoading: false });
+        }
     },
 
     updateProfile: async (updates: Partial<UserProfile>) => {

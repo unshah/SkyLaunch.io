@@ -19,6 +19,9 @@
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease",
         "environment": "production"
+      },
+      "ios": {
+        "environment": "production"
       }
     }
   },

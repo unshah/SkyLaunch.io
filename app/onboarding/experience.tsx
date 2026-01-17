@@ -5,6 +5,8 @@ import {
     StyleSheet,
     SafeAreaView,
     TextInput,
+    Keyboard,
+    TouchableWithoutFeedback,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Button } from '../../components/ui';
@@ -29,79 +31,81 @@ export default function ExperienceScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                {/* Progress indicator */}
-                <View style={styles.progress}>
-                    <View style={[styles.progressDot, styles.progressComplete]} />
-                    <View style={[styles.progressDot, styles.progressComplete]} />
-                    <View style={[styles.progressDot, styles.progressActive]} />
-                    <View style={styles.progressDot} />
-                </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.content}>
+                    {/* Progress indicator */}
+                    <View style={styles.progress}>
+                        <View style={[styles.progressDot, styles.progressComplete]} />
+                        <View style={[styles.progressDot, styles.progressComplete]} />
+                        <View style={[styles.progressDot, styles.progressActive]} />
+                        <View style={styles.progressDot} />
+                    </View>
 
-                {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.title}>Your experience</Text>
-                    <Text style={styles.subtitle}>
-                        How many flight hours do you have logged?
-                    </Text>
-                </View>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Your experience</Text>
+                        <Text style={styles.subtitle}>
+                            How many flight hours do you have logged?
+                        </Text>
+                    </View>
 
-                {/* Hours input */}
-                <View style={styles.inputSection}>
-                    <View style={styles.inputWrapper}>
-                        <TextInput
-                            style={styles.input}
-                            value={flightHours}
-                            onChangeText={setFlightHours}
-                            keyboardType="decimal-pad"
-                            placeholder="0"
-                            placeholderTextColor={colors.textTertiary}
+                    {/* Hours input */}
+                    <View style={styles.inputSection}>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                value={flightHours}
+                                onChangeText={setFlightHours}
+                                keyboardType="decimal-pad"
+                                placeholder="0"
+                                placeholderTextColor={colors.textTertiary}
+                            />
+                            <Text style={styles.inputSuffix}>hours</Text>
+                        </View>
+                        <Text style={styles.inputHint}>
+                            Enter 0 if you're just starting out
+                        </Text>
+                    </View>
+
+                    {/* Progress info */}
+                    <View style={styles.progressInfo}>
+                        <Text style={styles.progressTitle}>
+                            {hours === 0 ? 'Starting Fresh!' : hours < 10 ? 'Great Start!' : hours < 30 ? 'Making Progress!' : 'Almost There!'}
+                        </Text>
+                        <Text style={styles.progressDesc}>
+                            {hours === 0
+                                ? 'No worries - everyone starts at zero. We\'ll guide you through every step.'
+                                : `You've logged ${hours} hours. Only ${Math.max(0, 40 - hours)} more to reach the FAA minimum for PPL!`
+                            }
+                        </Text>
+
+                        {/* Visual progress bar */}
+                        <View style={styles.progressBar}>
+                            <View style={[styles.progressFill, { width: `${Math.min(100, (hours / 40) * 100)}%` }]} />
+                        </View>
+                        <View style={styles.progressLabels}>
+                            <Text style={styles.progressLabel}>{hours} hrs logged</Text>
+                            <Text style={styles.progressLabel}>40 hrs minimum</Text>
+                        </View>
+                    </View>
+
+                    {/* Note */}
+                    <View style={styles.note}>
+                        <Text style={styles.noteText}>
+                            📋 Based on FAR 61.109, you need at least 40 hours of flight time for your Private Pilot License.
+                        </Text>
+                    </View>
+
+                    {/* Continue button */}
+                    <View style={styles.footer}>
+                        <Button
+                            title="Continue"
+                            onPress={handleContinue}
+                            size="large"
                         />
-                        <Text style={styles.inputSuffix}>hours</Text>
-                    </View>
-                    <Text style={styles.inputHint}>
-                        Enter 0 if you're just starting out
-                    </Text>
-                </View>
-
-                {/* Progress info */}
-                <View style={styles.progressInfo}>
-                    <Text style={styles.progressTitle}>
-                        {hours === 0 ? 'Starting Fresh!' : hours < 10 ? 'Great Start!' : hours < 30 ? 'Making Progress!' : 'Almost There!'}
-                    </Text>
-                    <Text style={styles.progressDesc}>
-                        {hours === 0
-                            ? 'No worries - everyone starts at zero. We\'ll guide you through every step.'
-                            : `You've logged ${hours} hours. Only ${Math.max(0, 40 - hours)} more to reach the FAA minimum for PPL!`
-                        }
-                    </Text>
-
-                    {/* Visual progress bar */}
-                    <View style={styles.progressBar}>
-                        <View style={[styles.progressFill, { width: `${Math.min(100, (hours / 40) * 100)}%` }]} />
-                    </View>
-                    <View style={styles.progressLabels}>
-                        <Text style={styles.progressLabel}>{hours} hrs logged</Text>
-                        <Text style={styles.progressLabel}>40 hrs minimum</Text>
                     </View>
                 </View>
-
-                {/* Note */}
-                <View style={styles.note}>
-                    <Text style={styles.noteText}>
-                        📋 Based on FAR 61.109, you need at least 40 hours of flight time for your Private Pilot License.
-                    </Text>
-                </View>
-
-                {/* Continue button */}
-                <View style={styles.footer}>
-                    <Button
-                        title="Continue"
-                        onPress={handleContinue}
-                        size="large"
-                    />
-                </View>
-            </View>
+            </TouchableWithoutFeedback>
         </SafeAreaView>
     );
 }
