@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, ActivityIndicator, Text, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, Text, StyleSheet, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import * as Linking from 'expo-linking';
@@ -21,6 +21,23 @@ export default function AuthCallback() {
                     if (hash && hash.length > 1) {
                         // Parse the hash fragment
                         const params = new URLSearchParams(hash.substring(1));
+
+                        // Check for errors first (e.g., expired OTP)
+                        const error = params.get('error');
+                        const errorDescription = params.get('error_description');
+
+                        if (error) {
+                            console.error('AuthCallback: Auth error:', error, errorDescription);
+                            const message = errorDescription
+                                ? decodeURIComponent(errorDescription.replace(/\+/g, ' '))
+                                : 'Authentication failed. Please try again.';
+                            window.alert(message);
+                            // Clear the hash from URL
+                            window.history.replaceState(null, '', window.location.pathname);
+                            router.replace('/(auth)/login');
+                            return;
+                        }
+
                         const access_token = params.get('access_token');
                         const refresh_token = params.get('refresh_token');
                         const type = params.get('type');
@@ -70,10 +87,23 @@ export default function AuthCallback() {
                         const parsedUrl = Linking.parse(initialUrl);
 
                         if (parsedUrl.queryParams) {
-                            const { access_token, refresh_token } = parsedUrl.queryParams as {
+                            const { access_token, refresh_token, error, error_description } = parsedUrl.queryParams as {
                                 access_token?: string;
                                 refresh_token?: string;
+                                error?: string;
+                                error_description?: string;
                             };
+
+                            // Check for errors first (e.g., expired OTP)
+                            if (error) {
+                                console.error('AuthCallback: Auth error:', error, error_description);
+                                const message = error_description
+                                    ? decodeURIComponent(error_description.replace(/\+/g, ' '))
+                                    : 'Authentication failed. Please try again.';
+                                Alert.alert('Error', message);
+                                router.replace('/(auth)/login');
+                                return;
+                            }
 
                             if (access_token && refresh_token) {
                                 const { error } = await supabase.auth.setSession({

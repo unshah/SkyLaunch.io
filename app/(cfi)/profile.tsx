@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import { Card } from '../../components/ui';
 import { colors } from '../../constants/Colors';
 import { useAuthStore } from '../../stores/authStore';
-import { supabase } from '../../lib/supabase';
+import { supabase, getRedirectUrl } from '../../lib/supabase';
 
 export default function CFIProfileScreen() {
     const router = useRouter();
@@ -64,7 +64,9 @@ export default function CFIProfileScreen() {
 
         const sendResetEmail = async () => {
             setResettingPassword(true);
-            const { error } = await supabase.auth.resetPasswordForEmail(user.email!);
+            const { error } = await supabase.auth.resetPasswordForEmail(user.email!, {
+                redirectTo: getRedirectUrl(),
+            });
             setResettingPassword(false);
 
             if (error) {

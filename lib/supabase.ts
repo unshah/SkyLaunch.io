@@ -69,3 +69,11 @@ export const TABLES = {
     USER_TASKS: 'user_tasks',
     FLIGHT_LOG: 'flight_log',
 } as const;
+
+// Get the appropriate redirect URL based on platform
+export const getRedirectUrl = () => {
+    if (Platform.OS === 'web') {
+        return 'http://localhost:8081/auth/callback';
+    }
+    return 'skylaunch://auth/callback';
+};
