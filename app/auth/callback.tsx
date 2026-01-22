@@ -63,6 +63,14 @@ export default function AuthCallback() {
                             console.log('AuthCallback: Session set successfully');
                             // Clear the hash from URL
                             window.history.replaceState(null, '', window.location.pathname);
+
+                            // Check if this is a password recovery flow
+                            if (type === 'recovery') {
+                                console.log('AuthCallback: Password recovery flow detected');
+                                router.replace('/(auth)/reset-password');
+                                return;
+                            }
+
                             // Navigate to main app - root layout will handle routing based on onboarding status
                             router.replace('/');
                             return;
@@ -114,6 +122,14 @@ export default function AuthCallback() {
                                 if (error) {
                                     console.error('AuthCallback: Error setting session:', error);
                                     router.replace('/(auth)/login');
+                                    return;
+                                }
+
+                                // Check if this is a password recovery flow
+                                const type = parsedUrl.queryParams?.type as string | undefined;
+                                if (type === 'recovery') {
+                                    console.log('AuthCallback: Password recovery flow detected');
+                                    router.replace('/(auth)/reset-password');
                                     return;
                                 }
 

@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui';
 import { colors } from '../../constants/Colors';
 import { useAuthStore } from '../../stores/authStore';
+import { supabase, getPasswordResetRedirectUrl } from '../../lib/supabase';
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -21,6 +22,49 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [resettingPassword, setResettingPassword] = useState(false);
+
+    const handleForgotPassword = async () => {
+        if (!email.trim()) {
+            Platform.OS === 'web'
+                ? window.alert('Please enter your email address first')
+                : Alert.alert('Email Required', 'Please enter your email address first');
+            return;
+        }
+
+        const sendResetEmail = async () => {
+            setResettingPassword(true);
+            const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+                redirectTo: getPasswordResetRedirectUrl(),
+            });
+            setResettingPassword(false);
+
+            if (error) {
+                Platform.OS === 'web'
+                    ? window.alert('Failed to send reset email: ' + error.message)
+                    : Alert.alert('Error', 'Failed to send reset email: ' + error.message);
+            } else {
+                Platform.OS === 'web'
+                    ? window.alert('Password reset email sent! Check your inbox.')
+                    : Alert.alert('Success', 'Password reset email sent! Check your inbox.');
+            }
+        };
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`Send password reset email to ${email.trim()}?`)) {
+                sendResetEmail();
+            }
+        } else {
+            Alert.alert(
+                'Reset Password',
+                `Send password reset email to ${email.trim()}?`,
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Send', onPress: sendResetEmail },
+                ]
+            );
+        }
+    };
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -91,8 +135,14 @@ export default function LoginScreen() {
                             </View>
                         </View>
 
-                        <TouchableOpacity style={styles.forgotPassword}>
-                            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                        <TouchableOpacity
+                            style={styles.forgotPassword}
+                            onPress={handleForgotPassword}
+                            disabled={resettingPassword}
+                        >
+                            <Text style={styles.forgotPasswordText}>
+                                {resettingPassword ? 'Sending...' : 'Forgot password?'}
+                            </Text>
                         </TouchableOpacity>
                     </View>
 

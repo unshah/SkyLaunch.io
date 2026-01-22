@@ -77,3 +77,8 @@ export const getRedirectUrl = () => {
     }
     return 'skylaunch://auth/callback';
 };
+
+// Password reset always redirects to native app (not web)
+export const getPasswordResetRedirectUrl = () => {
+    return 'skylaunch://auth/callback';
+};
