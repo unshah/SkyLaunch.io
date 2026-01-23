@@ -20,7 +20,7 @@ Designed for the React Native ecosystem, it solves the specific data fragmentati
 ## 📸 Interface
 | Syllabus Tracker | Weather Intelligence | Progress Rings |
 |:---:|:---:|:---:|
-| <img src="docs/assets/images/image2.png" width="200" alt="Syllabus View" /> | <img src="docs/assets/images/image4.png" width="200" alt="Weather View" /> | <img src="docs/assets/images/image0.png" width="200" alt="Progress View" /> |
+| <img src="assets/images/image2.png" width="200" alt="Syllabus View" /> | <img src="assets/images/image4.png" width="200" alt="Weather View" /> | <img src="assets/images/image0.png" width="200" alt="Progress View" /> |
 
 ---
 
