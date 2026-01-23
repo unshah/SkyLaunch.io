@@ -76,8 +76,8 @@ Designed to bridge the gap between the Student (at home) and the CFI (at the fli
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/yourusername/SkyLaunch.git](https://github.com/yourusername/SkyLaunch.git)
-    cd SkyLaunch/app-src
+    git clone https://github.com/unshah/SkyLaunch.io.git
+    cd SkyLaunch.io/app-src
     ```
 
 2.  **Install dependencies**
@@ -112,9 +112,16 @@ This project is architected and maintained by **[Ujjwal Shah](https://ushah.me)*
 
 SkyLaunch is an open effort to modernize general aviation software. We strictly adhere to "Clean Architecture" principles to ensure the codebase remains accessible to developer-pilots who wish to contribute.
 
-**How to Contribute:**
-* **Student Pilots:** Submit feature requests via Issues regarding UI/UX friction in the cockpit.
-* **Developers:** Check the `Good First Issue` tag. We are specifically looking for help optimizing the vector map rendering on older Android devices.
+## 🤝 Contributing & Community
+
+SkyLaunch is an open-source project, and we welcome contributions from the aviation and developer communities.
+
+**How to get involved:**
+* **Feature Requests:** Have an idea for a better "Syllabus View" or a specific metric you want to track? Open an Issue on GitHub.
+* **Bug Reports:** If you notice a calculation error in the scheduling engine, please report it.
+* **Pull Requests:** We are open to PRs! Please check the `Help Wanted` tag for tasks related to **Unit Testing** and **Documentation** before diving into core logic.
+
+*Note: Please read `CONTRIBUTING.md` before submitting code.*
 
 ---
 
