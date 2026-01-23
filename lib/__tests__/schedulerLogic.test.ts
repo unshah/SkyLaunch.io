@@ -161,7 +161,7 @@ describe('determineLessonType', () => {
         type: 'solo',
         text: 'Solo endorsement',
         signed_at: '2024-01-01',
-        expires_at: '2025-12-31', // Valid future date
+        expires_at: '2027-12-31', // Valid future date
     };
 
     const expiredEndorsement: Endorsement = {
@@ -386,7 +386,7 @@ describe('Scheduling Scenario Tests', () => {
         type: 'solo',
         text: 'Solo',
         signed_at: '2024-01-01',
-        expires_at: '2025-12-31',
+        expires_at: '2027-12-31',
     };
 
     it('Scenario: Student proficient in steep turns, needs work on landings', () => {

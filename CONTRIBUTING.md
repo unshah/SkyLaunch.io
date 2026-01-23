@@ -218,7 +218,7 @@ npm test -- scheduleStore.test.ts
 
 ### Writing Tests
 
-- Place tests adjacent to the code: `myFile.ts` → `myFile.test.ts`
+- Place tests in `__tests__` folders adjacent to the code being tested (e.g., `lib/__tests__/schedulerLogic.test.ts`)
 - Test business logic and utility functions
 - Mock Supabase calls appropriately
 
