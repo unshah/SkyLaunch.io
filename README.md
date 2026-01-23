@@ -29,7 +29,7 @@ Designed for the React Native ecosystem, it solves the specific data fragmentati
 Flight training in the US operates under two regulations: Part 141 (Rigid/School-based) and Part 61 (Flexible/Freelance). While Part 61 offers flexibility, it suffers from **systemic data fragmentation**:
 
 1.  **State Management Failure:** When a student changes instructors, their "training state" (proficiency in specific maneuvers) is lost or relies on subjective paper notes.
-2.  **Lack of Deterministic Scheduling:** Go/No-Go decisions are often made based on "gut feeling" rather than data, leading to wasted commute times for students when crosswinds exceed personal minimums.
+2.  **Lack of Deterministic Scheduling:** Go/No-Go decisions are often made based on "gut feeling" at the hangar. SkyLaunch shifts this decision to the **Pre-flight Briefing** phase, using live data to prevent wasted trips to the airport.
 3.  **Linear Logging vs. Non-Linear Learning:** Traditional logbooks track *time* (linear), but flight proficiency is *asymptotic*. Existing tools fail to visualize this difference.
 
 **SkyLaunch solves this by treating the FAA ACS as a data schema, linking individual flight telemetry to certification milestones.**
@@ -43,10 +43,10 @@ Unlike standard calendar apps, SkyLaunch uses a "Constraint-Based" scheduling lo
 * **VFR-Lock:** Integrates real-time METAR data to flag slots as "No-Go" if ceiling/visibility drops below student minimums.
 * **Curriculum Prioritization:** Automatically suggests the next maneuver based on the "decay rate" of previously learned skills.
 
-### 🧩 Offline-First Architecture
-Built for the cockpit environment (iPad Mini/Cellular), where connectivity is intermittent at 5,000ft.
-* **Local Database:** Uses SQLite (via WatermelonDB) for sub-millisecond query speeds.
-* **Sync Strategy:** "Optimistic UI" updates that sync to Supabase when the aircraft is back on the ramp.
+### 🔄 Real-Time "Digital Chain of Custody"
+Designed to bridge the gap between the Student (at home) and the CFI (at the flight school).
+* **Instant Sync:** Leverages Supabase real-time subscriptions to ensure that when a student logs a flight, the CFI's dashboard updates immediately for grading.
+* **Briefing/Debriefing Mode:** Optimized for the "ground school" workflow, allowing instructors to review flight metrics and sign digital endorsements without passing a physical logbook back and forth.
 
 ### 📊 The "Proficiency Graph"
 * **Visualizing Competence:** Replaces the paper logbook with dynamic "Progress Rings."
@@ -59,11 +59,10 @@ Built for the cockpit environment (iPad Mini/Cellular), where connectivity is in
 | Layer | Technology | Decision Rationale |
 |-------|------------|-------------------|
 | **Framework** | Expo (React Native) | Single codebase for iOS/Android; OTA update capability. |
-| **State** | Zustand | Transient state management for flight recording sessions. |
-| **Backend** | Supabase | Postgres Row Level Security (RLS) ensures student data privacy. |
-| **Persistence** | SQLite | Critical for offline-first cockpit functionality. |
+| **State** | Zustand | Lightweight state management for complex briefing forms. |
+| **Backend** | Supabase | Postgres RLS for privacy; Realtime subscriptions for student-CFI sync. |
+| **API** | NOAA/AWC | Direct integration for live METAR/TAF data. |
 | **Testing** | Jest + ts-jest | Ensures reliability of pace calculation algorithms. |
-
 ---
 
 ## 🚀 Getting Started
